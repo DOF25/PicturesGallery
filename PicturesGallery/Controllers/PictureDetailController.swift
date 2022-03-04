@@ -29,10 +29,10 @@ final class PictureDetailController: UIViewController {
                                                       for: .vertical)
         return label
     }()
-    private let photo: Photo
+    private let photo: RealmPhoto
     private let dateFormatter = DateFormatter()
     //MARK: - Life Cycle
-    init(photo: Photo) {
+    init(photo: RealmPhoto) {
         self.photo = photo
         super.init(nibName: nil, bundle: nil)
     }
@@ -70,7 +70,7 @@ final class PictureDetailController: UIViewController {
         self.dateLabel.text = "Дата публикации: \(date)"
     }
     private func loadPhotoFromRealm() {
-        guard let data = RealmManager.shared.extractPhotoFromRealm(for: photo) else { return }
+        let data = photo.image
         let image = UIImage(data: data, scale: 1.0)
         self.imageView.image = image
     }

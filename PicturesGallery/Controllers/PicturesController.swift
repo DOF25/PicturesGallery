@@ -35,7 +35,6 @@ class PicturesController: UIViewController {
         self.title = "Галерея"
         setupConstraints()
         setupCollectionView()
-        RealmManager.shared.deleteData()
         fetchPhotos()
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -125,7 +124,8 @@ extension PicturesController: UICollectionViewDelegateFlowLayout {
 extension PicturesController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let photo = photos[indexPath.row]
-        let pictureDetailController = PictureDetailController(photo: photo)
+        guard let realmPhoto = RealmManager.shared.extractPhotoFromRealm(for: photo) else { return }
+        let pictureDetailController = PictureDetailController(photo: realmPhoto)
         navigationController?.pushViewController(pictureDetailController, animated: true)
     }
 }
@@ -148,8 +148,8 @@ extension PicturesController: UICollectionViewDataSourcePrefetching {
                         let newIndexPath = IndexPath(row: (index + 1) + (self.photos.count - 1), section: 0)
                         indexPathArray.append(newIndexPath)
                     }
+                    self.photos.append(contentsOf: photos)
                     DispatchQueue.main.async {
-                        self.photos.append(contentsOf: photos)
                         self.collectionView.insertItems(at: indexPathArray)
                         self .isLoading = false
                     }

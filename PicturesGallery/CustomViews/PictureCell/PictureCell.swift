@@ -76,19 +76,20 @@ final class PictureCell: UICollectionViewCell {
         }
     }
     private func configurePhotoForCell(photo: Photo) {
-        let imageData = RealmManager.shared.extractPhotoFromRealm(for: photo)
-        if imageData == nil {
+        let realmPhoto = RealmManager.shared.extractPhotoFromRealm(for: photo)
+        if realmPhoto == nil {
             downloadPicture(with: photo.urls.regular) { data in
-                RealmManager.shared.safePhotoToRealm(for: photo.id, data)
+                RealmManager.shared.safePhotoToRealm(photo: photo, with: data)
             }
+            self.authorsLabel.text = "Автор: \(photo.authorsName.name)"
         } else {
-            guard let imageData = imageData else { return }
-            self.imageView.image = UIImage(data: imageData, scale: 1.0)
+            guard let realmPhoto = realmPhoto else { return }
+            self.imageView.image = UIImage(data: realmPhoto.image, scale: 1.0)
+            self.authorsLabel.text = "Автор: \(realmPhoto.authorsName)"
         }
     }
     //MARK: - Public methods
     public func configure(photo: Photo) {
         configurePhotoForCell(photo: photo)
-        self.authorsLabel.text = "Автор: \(photo.authorsName.name)"
     }
 }

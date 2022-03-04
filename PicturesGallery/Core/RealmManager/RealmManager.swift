@@ -15,25 +15,29 @@ final class RealmManager {
     static let shared = RealmManager()
     private init() {}
 
-    public func safePhotoToRealm(for id: String, _ image: Data) {
-        let photo = RealmPhoto(id: id, image: image)
-        let configuration = Realm.Configuration.init(deleteRealmIfMigrationNeeded: false)
-        do {
-            let realm = try Realm(configuration: configuration)
-            try realm.write {
-                realm.add(photo)
+    public func safePhotoToRealm(photo: Photo, with data: Data) {
+        let photo = RealmPhoto(id: photo.id,
+                               image: data,
+                               creationDate: photo.creationDate,
+                               authorsName: photo.authorsName.name)
+        let configuration = Realm.Configuration.init(deleteRealmIfMigrationNeeded: true)
+            do {
+                let realm = try Realm(configuration: configuration)
+                try realm.write {
+                    realm.add(photo)
+                }
+                print(realm.configuration.fileURL)
+            } catch {
+                print(error)
             }
-        } catch {
-            print(error)
-        }
     }
 
-    public func extractPhotoFromRealm(for photo: Photo) -> Data? {
-        let configuration = Realm.Configuration.init(deleteRealmIfMigrationNeeded: false)
+    public func extractPhotoFromRealm(for photo: Photo) -> RealmPhoto? {
+        let configuration = Realm.Configuration.init(deleteRealmIfMigrationNeeded: true)
         do {
             let realm = try Realm(configuration: configuration)
             let realmPhotos = realm.objects(RealmPhoto.self)
-            let neededPhoto = realmPhotos.first { $0.id == photo.id }?.image
+            let neededPhoto = realmPhotos.first { $0.id == photo.id }
             return neededPhoto
         } catch {
             print(error)
@@ -42,7 +46,7 @@ final class RealmManager {
     }
 
     public func deleteData() {
-        let configuration = Realm.Configuration.init(deleteRealmIfMigrationNeeded: false)
+        let configuration = Realm.Configuration.init(deleteRealmIfMigrationNeeded: true)
         do {
             let realm = try Realm(configuration: configuration)
             let photos = realm.objects(RealmPhoto.self)
